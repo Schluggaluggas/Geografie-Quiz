@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GeoGuessr: Albert-Einstein-Gymnasium</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <style>
+    #map {
+      height: 600px;
+    }
+    #end-game {
+      text-align: center;
+      font-size: 24px;
+      font-family: Arial, sans-serif;
+      padding: 50px;
+    }
+    #score-display {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    #current-score {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>GeoGuessr: Finde das Albert-Einstein-Gymnasium!</h1>
+  <div id="map"></div>
+
+  <div id="end-game" style="display: none;">
+    <div id="score-display"></div>
+    <div>Glückwunsch, du AEG-Profi!</div>
+  </div>
+
+  <div id="current-score">Aktuelle Punktzahl: 0</div>
+
+  <script>
+    // Koordinaten der 15 Guess Points (alle gleich wie der Zielpunkt)
+    const guessPoints = [
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 1
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 2
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 3
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 4
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 5
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 6
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 7
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 8
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 9
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 10
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 11
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 12
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 13
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 14
+      [53.56610363634409, 13.268178764930465], // Beispielpunkt 15
+    ];
+
+    // Zielpunkt festlegen (im Albert-Einstein-Gymnasium)
+    const targetPoint = [53.56610363634409, 13.268178764930465]; // Fokussierter Punkt (neue Koordinaten)
+
+    // Spieler-Daten
+    let currentScore = 0;
+    let currentGuessIndex = 0;
+
+    // Leaflet Karte erstellen
+    const map = L.map('map').setView(targetPoint, 18); // Anfangs fokussiert auf den neuen Punkt
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+    }).addTo(map);
+
+    // Funktion zum Berechnen der Entfernung zwischen zwei Punkten
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // Erdradius in Metern
+      const φ1 = lat1 * (Math.PI / 180);
+      const φ2 = lat2 * (Math.PI / 180);
+      const Δφ = (lat2 - lat1) * (Math.PI / 180);
+      const Δλ = (lon2 - lon1) * (Math.PI / 180);
+
+      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c; // Entfernung in Metern
+    }
+
+    // Funktion zum Berechnen der Punktzahl
+    function getScore(distance) {
+      if (distance < 10) return 50;   // Sehr nah (<10 Meter)
+      if (distance < 20) return 40;   // Relativ nah (10-20 Meter)
+      if (distance < 30) return 30;   // Weiter weg (20-30 Meter)
+      if (distance < 40) return 20;   // Noch weiter weg (30-40 Meter)
+      if (distance < 50) return 10;   // Noch weiter (40-50 Meter)
+      return 0;                       // Zu weit entfernt (>50 Meter)
+    }
+
+    // Spieler gibt Tipp ab
+    map.on('click', function(e) {
+      if (currentGuessIndex >= guessPoints.length) {
+        // Spiel beendet, Karte ausblenden und Ergebnis anzeigen
+        document.getElementById('map').style.display = 'none';
+        document.getElementById('end-game').style.display = 'block';
+
+        // Punktzahl anzeigen
+        document.getElementById('score-display').textContent = `Deine Endpunktzahl: ${currentScore} Punkte`;
+
+        return;
+      }
+
+      const { lat, lng } = e.latlng;
+      const distance = calculateDistance(guessPoints[currentGuessIndex][0], guessPoints[currentGuessIndex][1], lat, lng);
+      const score = getScore(distance);
+      currentScore += score;
+
+      // Punktzahl live anzeigen
+      document.getElementById('current-score').textContent = `Aktuelle Punktzahl: ${currentScore}`;
+
+      // Nächsten Punkt freigeben
+      currentGuessIndex++;
+      if (currentGuessIndex < guessPoints.length) {
+        alert(`Deine Punktzahl für diesen Tipp: ${score}. Klicke auf die Karte, um den nächsten Punkt zu raten.`);
+      }
+    });
+  </script>
+</body>
+</html>
