@@ -1,126 +1,151 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>GeoGuessr: Albert-Einstein-Gymnasium</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-  <style>
-    #map {
-      height: 600px;
-    }
-    #end-game {
-      text-align: center;
-      font-size: 24px;
-      font-family: Arial, sans-serif;
-      padding: 50px;
-    }
-    #score-display {
-      font-size: 32px;
-      font-weight: bold;
-      margin: 20px 0;
-    }
-    #current-score {
-      font-size: 24px;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-  </style>
+    <title>Geo-Guessr Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 500px;
+            display: none; /* Start with the map hidden */
+        }
+        #game-container {
+            text-align: center;
+        }
+        #image {
+            max-width: 80%;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-  <h1>GeoGuessr: Finde das Albert-Einstein-Gymnasium!</h1>
-  <div id="map"></div>
+    <div id="game-container">
+        <img id="image" src="" alt="Current location">
+        <div id="map"></div>
+        <p id="score">Aktuelle Punktzahl: 0</p>
+        <button id="start-button">Start Game</button>
+    </div>
 
-  <div id="end-game" style="display: none;">
-    <div id="score-display"></div>
-    <div>Glückwunsch, du AEG-Profi!</div>
-  </div>
+    <script>
+        const locations = [
+            [53.566305296984, 13.268703104912152], // Beispielpunkt 1
+            [53.56705864598058, 13.268795289456328], // Beispielpunkt 2
+            [53.56600498649628, 13.268694732676074], // Beispielpunkt 3
+            [53.56615925258825, 13.268794353940043], // Beispielpunkt 4
+            [53.566433722561534, 13.268866276547065], // Beispielpunkt 5
+            [53.56553827098172, 13.268439974291221], // Beispielpunkt 6
+            [53.56634436151365, 13.269100373943559], // Beispielpunkt 7
+            [53.56643166986505, 13.268475846783412], // Beispielpunkt 8
+            [53.56576254217857, 13.268780466247069], // Beispielpunkt 9
+            [53.566267742626934, 13.268499935255944], // Beispielpunkt 10
+            [53.56653711029122, 13.268750987310785], // Beispielpunkt 11
+            [53.56619553731601, 13.268718900031725], // Beispielpunkt 12
+            [53.5662282503838, 13.268207197101098], // Beispielpunkt 13
+            [53.5655961004054, 13.26808885297522], // Beispielpunkt 14
+            [53.56688226677813, 13.267541415001245] // Beispielpunkt 15
+        ];
 
-  <div id="current-score">Aktuelle Punktzahl: 0</div>
+        let currentIndex = 0;
+        let totalScore = 0;
+        let map, marker;
 
-  <script>
-    // Koordinaten der 15 Guess Points (alle gleich wie der Zielpunkt)
-    const guessPoints = [
-      [53.56705864598058, 13.268795289456328], // Beispielpunkt 1
-      [53.56600498649628, 13.268694732676074], // Beispielpunkt 2
-      [53.56615925258825, 13.268794353940043], // Beispielpunkt 3
-      [53.56553827098172, 13.268439974291221], // Beispielpunkt 4
-      [53.56634436151365, 13.269100373943559], // Beispielpunkt 5
-      [53.56643166986505, 13.268475846783412], // Beispielpunkt 6
-      [53.56576254217857, 13.268780466247069], // Beispielpunkt 7
-      [53.566267742626934, 13.268499935255944], // Beispielpunkt 8
-      [53.56653711029122, 13.268750987310785], // Beispielpunkt 9
-      [53.56619553731601, 13.268718900031725], // Beispielpunkt 10
-      [53.5662282503838, 13.268207197101098], // Beispielpunkt 11
-      [53.5655961004054, 13.26808885297522  ], // Beispielpunkt 12
-      [53.56688226677813, 13.267541415001245], // Beispielpunkt 13
- 
-    ];
+        const startButton = document.getElementById("start-button");
+        const mapElement = document.getElementById("map");
+        const imageElement = document.getElementById("image");
+        const scoreElement = document.getElementById("score");
 
-    // Zielpunkt festlegen (im Albert-Einstein-Gymnasium)
-    const targetPoint = [53.56610363634409, 13.268178764930465]; // Fokussierter Punkt (neue Koordinaten)
+        function startGame() {
+            startButton.style.display = "none";
+            showNextLocation();
+        }
 
-    // Spieler-Daten
-    let currentScore = 0;
-    let currentGuessIndex = 0;
+        function showNextLocation() {
+            if (currentIndex >= locations.length) {
+                endGame();
+                return;
+            }
 
-    // Leaflet Karte erstellen
-    const map = L.map('map').setView(targetPoint, 18); // Anfangs fokussiert auf den neuen Punkt
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-    }).addTo(map);
+            // Update image
+            imageElement.src = `images/${currentIndex + 1}.jpg`;
+            imageElement.style.display = "block";
 
-    // Funktion zum Berechnen der Entfernung zwischen zwei Punkten
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; // Erdradius in Metern
-      const φ1 = lat1 * (Math.PI / 180);
-      const φ2 = lat2 * (Math.PI / 180);
-      const Δφ = (lat2 - lat1) * (Math.PI / 180);
-      const Δλ = (lon2 - lon1) * (Math.PI / 180);
+            // Show map
+            mapElement.style.display = "block";
 
-      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c; // Entfernung in Metern
-    }
+            if (!map) {
+                initializeMap();
+            }
 
-    // Funktion zum Berechnen der Punktzahl
-    function getScore(distance) {
-      if (distance < 10) return 50;   // Sehr nah (<10 Meter)
-      if (distance < 20) return 40;   // Relativ nah (10-20 Meter)
-      if (distance < 30) return 30;   // Weiter weg (20-30 Meter)
-      if (distance < 40) return 20;   // Noch weiter weg (30-40 Meter)
-      if (distance < 50) return 10;   // Noch weiter (40-50 Meter)
-      return 0;                       // Zu weit entfernt (>50 Meter)
-    }
+            map.setView([53.56610363634409, 13.268178764930465], 18);
 
-    // Spieler gibt Tipp ab
-    map.on('click', function(e) {
-      if (currentGuessIndex >= guessPoints.length) {
-        // Spiel beendet, Karte ausblenden und Ergebnis anzeigen
-        document.getElementById('map').style.display = 'none';
-        document.getElementById('end-game').style.display = 'block';
+            // Remove previous marker if exists
+            if (marker) {
+                map.removeLayer(marker);
+            }
 
-        // Punktzahl anzeigen
-        document.getElementById('score-display').textContent = `Deine Endpunktzahl: ${currentScore} Punkte`;
+            map.once('click', function (e) {
+                const guessedLat = e.latlng.lat;
+                const guessedLng = e.latlng.lng;
+                calculateScore(guessedLat, guessedLng);
+                currentIndex++;
+                setTimeout(showNextLocation, 1000); // Show next location after 1 second
+            });
+        }
 
-        return;
-      }
+        function initializeMap() {
+            map = L.map('map').setView([53.56610363634409, 13.268178764930465], 18);
 
-      const { lat, lng } = e.latlng;
-      const distance = calculateDistance(guessPoints[currentGuessIndex][0], guessPoints[currentGuessIndex][1], lat, lng);
-      const score = getScore(distance);
-      currentScore += score;
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19
+            }).addTo(map);
+        }
 
-      // Punktzahl live anzeigen
-      document.getElementById('current-score').textContent = `Aktuelle Punktzahl: ${currentScore}`;
+        function calculateScore(guessedLat, guessedLng) {
+            const actualLat = locations[currentIndex][0];
+            const actualLng = locations[currentIndex][1];
+            const distance = getDistance(guessedLat, guessedLng, actualLat, actualLng);
 
-      // Nächsten Punkt freigeben
-      currentGuessIndex++;
-      if (currentGuessIndex < guessPoints.length) {
-        alert(`Deine Punktzahl für diesen Tipp: ${score}. Klicke auf die Karte, um den nächsten Punkt zu raten.`);
-      }
-    });
-  </script>
+            let points = 0;
+            if (distance < 10) {
+                points = 50;
+            } else if (distance < 20) {
+                points = 40;
+            } else if (distance < 30) {
+                points = 30;
+            } else if (distance < 40) {
+                points = 20;
+            } else if (distance < 50) {
+                points = 10;
+            }
+
+            totalScore += points;
+            scoreElement.textContent = `Aktuelle Punktzahl: ${totalScore}`;
+        }
+
+        function getDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371e3; // metres
+            const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lng2 - lng1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            const d = R * c; // in metres
+            return d;
+        }
+
+        function endGame() {
+            mapElement.style.display = "none";
+            imageElement.style.display = "none";
+            scoreElement.textContent = `Deine Gesamtpunktzahl: ${totalScore}`;
+        }
+
+        startButton.addEventListener("click", startGame);
+    </script>
 </body>
 </html>
