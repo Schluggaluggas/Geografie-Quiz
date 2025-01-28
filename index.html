@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>Geo-Guessr Game</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geo-Guessr Game</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-    <script src="https://cdn.emailjs.com/dist/email.min.js"></script> <!-- EmailJS script -->
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
     <style>
         #map {
             height: 500px;
@@ -18,35 +19,29 @@
             max-width: 80%;
             margin-bottom: 20px;
         }
-        #end-message {
-            font-size: 2em;
-            font-weight: bold;
-            transition: color 1s;
-        }
-        #name-input {
-            margin-bottom: 20px;
-            font-size: 1.2em;
-            padding: 5px;
-        }
-        #name-container {
-            text-align: center;
-        }
     </style>
 </head>
 <body>
     <div id="game-container">
+        <!-- Name Eingabe -->
         <div id="name-container">
-            <label for="name-input">Gib deinen Namen ein: </label>
-            <input type="text" id="name-input" placeholder="Dein Name">
-            <button id="start-button">Start Game</button>
+            <input type="text" id="name" placeholder="Dein Name" />
+            <button onclick="startGame()">Spiel starten</button>
         </div>
-
+        
         <img id="image" src="" alt="Current location">
         <div id="map"></div>
         <p id="score">Aktuelle Punktzahl: 0</p>
+        <button id="start-button" style="display: none;">Start Game</button>
     </div>
 
     <script>
+        // EmailJS initialisieren
+        emailjs.init("your_user_id"); // Ersetze "your_user_id" mit deinem tatsächlichen EmailJS User-ID
+
+        let playerName = "";
+        let totalScore = 0;
+
         const locations = [
             [53.56710677015334, 13.268797977178176], // Beispielpunkt 1
             [53.56600797893083, 13.268674562526783], // Beispielpunkt 2
@@ -64,43 +59,37 @@
         ];
 
         let currentIndex = 0;
-        let totalScore = 0;
         let map, marker;
-        let playerName = "";
-
-        const startButton = document.getElementById("start-button");
-        const mapElement = document.getElementById("map");
-        const imageElement = document.getElementById("image");
         const scoreElement = document.getElementById("score");
-        const nameInput = document.getElementById("name-input");
+        const imageElement = document.getElementById("image");
+        const mapElement = document.getElementById("map");
 
-        // Initialize EmailJS
-        emailjs.init("user_your_user_id_here"); // Ersetze mit deinem EmailJS Benutzer-ID
-
+        // Funktion zum Starten des Spiels
         function startGame() {
-            playerName = nameInput.value.trim();
+            playerName = document.getElementById("name").value;
+
             if (playerName === "") {
                 alert("Bitte gib deinen Namen ein!");
                 return;
             }
-            
-            // Verstecke das Nameingabefeld
+
+            // Namensabfrage und Startbutton ausblenden
             document.getElementById("name-container").style.display = "none";
-            startButton.style.display = "none";
+
+            // Spiel starten
             showNextLocation();
         }
 
+        // Funktion, um den nächsten Standort anzuzeigen
         function showNextLocation() {
             if (currentIndex >= locations.length) {
                 endGame();
                 return;
             }
 
-            // Update image
             imageElement.src = `images/${currentIndex + 1}.jpg`;
             imageElement.style.display = "block";
 
-            // Show map
             mapElement.style.display = "block";
 
             if (!map) {
@@ -109,7 +98,6 @@
 
             map.setView([53.56610363634409, 13.268178764930465], 18);
 
-            // Remove previous marker if exists
             if (marker) {
                 map.removeLayer(marker);
             }
@@ -119,10 +107,11 @@
                 const guessedLng = e.latlng.lng;
                 calculateScore(guessedLat, guessedLng);
                 currentIndex++;
-                setTimeout(showNextLocation, 1000); // Show next location after 1 second
+                setTimeout(showNextLocation, 1000);
             });
         }
 
+        // Funktion zur Initialisierung der Karte
         function initializeMap() {
             map = L.map('map').setView([53.56610363634409, 13.268178764930465], 18);
 
@@ -131,6 +120,7 @@
             }).addTo(map);
         }
 
+        // Funktion zum Berechnen der Punktzahl
         function calculateScore(guessedLat, guessedLng) {
             const actualLat = locations[currentIndex][0];
             const actualLng = locations[currentIndex][1];
@@ -153,8 +143,9 @@
             scoreElement.textContent = `Aktuelle Punktzahl: ${totalScore}`;
         }
 
+        // Funktion zur Berechnung der Distanz
         function getDistance(lat1, lng1, lat2, lng2) {
-            const R = 6371e3; // metres
+            const R = 6371e3; // in Metern
             const φ1 = lat1 * Math.PI / 180;
             const φ2 = lat2 * Math.PI / 180;
             const Δφ = (lat2 - lat1) * Math.PI / 180;
@@ -165,40 +156,33 @@
                       Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-            const d = R * c; // in metres
-            return d;
+            return R * c; // in Metern
         }
 
+        // Funktion zum Beenden des Spiels
         function endGame() {
             mapElement.style.display = "none";
             imageElement.style.display = "none";
             scoreElement.textContent = `Deine Gesamtpunktzahl: ${totalScore}`;
 
-            // Endbildschirm-Nachricht
-            const endMessage = document.createElement("p");
-            endMessage.id = "end-message";
-            endMessage.textContent = "Glückwunsch, du AEG-Profi! Du weißt anscheinend (unüberraschenderweise) viel über das AEG. Aber reicht es auch, um der Klassenbeste zu sein?";
-            document.getElementById("game-container").appendChild(endMessage);
-
-            // Send email with score
-            sendEmail();
+            sendEmail(playerName, totalScore);
         }
 
-        function sendEmail() {
+        // Funktion zum Senden der E-Mail
+        function sendEmail(name, score) {
             const templateParams = {
-                playerName: playerName,
-                totalScore: totalScore
+                name: name,
+                score: score,
+                message: "Glückwunsch, du hast das Spiel beendet!"
             };
 
-            emailjs.send("service_your_service_id_here", "template_your_template_id_here", templateParams)
+            emailjs.send('your_service_id', 'your_template_id', templateParams)
                 .then(function(response) {
-                    console.log('SUCCESS!', response);
+                    console.log("E-Mail gesendet: ", response);
                 }, function(error) {
-                    console.log('FAILED...', error);
+                    console.log("Fehler beim Senden der E-Mail: ", error);
                 });
         }
-
-        startButton.addEventListener("click", startGame);
     </script>
 </body>
 </html>
