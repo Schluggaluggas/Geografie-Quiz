@@ -8,9 +8,14 @@
     <style>
         #map {
             height: 500px;
+            display: none; /* Start with the map hidden */
         }
         #game-container {
             text-align: center;
+        }
+        #image {
+            max-width: 80%;
+            margin-bottom: 20px;
         }
         #end-message {
             font-size: 20px;
@@ -21,6 +26,7 @@
 </head>
 <body>
     <div id="game-container">
+        <img id="image" src="" alt="Current location">
         <div id="map"></div>
         <p id="score">Aktuelle Punktzahl: 0</p>
         <button id="start-button">Start Game</button>
@@ -52,6 +58,7 @@
 
         const startButton = document.getElementById("start-button");
         const mapElement = document.getElementById("map");
+        const imageElement = document.getElementById("image");
         const scoreElement = document.getElementById("score");
         const endMessageElement = document.getElementById("end-message");
 
@@ -66,7 +73,13 @@
                 return;
             }
 
+            // Update image
+            imageElement.src = `images/${currentIndex + 1}.jpg`;
+            imageElement.style.display = "block";
+
             // Show map
+            mapElement.style.display = "block";
+
             if (!map) {
                 initializeMap();
             }
@@ -101,3 +114,58 @@
             const distance = getDistance(guessedLat, guessedLng, actualLat, actualLng);
 
             let points = 0;
+            let message = "";
+
+            if (distance < 10) {
+                points = 50;
+                message = "Profi!";
+            } else if (distance < 20) {
+                points = 40;
+                message = "Nice!";
+            } else if (distance < 30) {
+                points = 30;
+                message = "Gut!";
+            } else if (distance < 40) {
+                points = 20;
+                message = "Schlecht!";
+            } else if (distance < 50) {
+                points = 10;
+                message = "Grottig!";
+            } else {
+                points = 0;
+                message = "Bodenlos!";
+            }
+
+            totalScore += points;
+            scoreElement.textContent = `Aktuelle Punktzahl: ${totalScore}`;
+            alert(`Du hast ${points} Punkte! ${message}`); // Popup message after each guess
+        }
+
+        function getDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371e3; // metres
+            const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lng2 - lng1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            const d = R * c; // in metres
+            return d;
+        }
+
+        function endGame() {
+            mapElement.style.display = "none";
+            imageElement.style.display = "none";
+            scoreElement.textContent = `Deine Gesamtpunktzahl: ${totalScore}`;
+
+            endMessageElement.textContent = "Glückwunsch, du AEG-Profi! Scheint, als kennst du dich am AEG gut aus :D";
+        }
+
+        startButton.addEventListener("click", startGame);
+    </script>
+</body>
+</html>
