@@ -17,11 +17,6 @@
             max-width: 80%;
             margin-bottom: 20px;
         }
-        #end-message {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
@@ -30,25 +25,25 @@
         <div id="map"></div>
         <p id="score">Aktuelle Punktzahl: 0</p>
         <button id="start-button">Start Game</button>
-        <p id="end-message"></p> <!-- Display the end message here -->
     </div>
 
     <script>
         const locations = [
-            [53.567056978915815, 13.268788510686624], // Beispielpunkt 1
-            [53.56601279319075, 13.268668290705238], // Beispielpunkt 2
-            [53.56617567001152, 13.268792267561043], // Beispielpunkt 3
-            [53.56551746529244, 13.268435364504597], // Beispielpunkt 4
-            [53.56633185267493, 13.269134143171222], // Beispielpunkt 5
-            [53.566441180196364, 13.268484203896842], // Beispielpunkt 6
-            [53.56575843634788, 13.268758455734613], // Beispielpunkt 7
-            [53.56627384203371, 13.268491717650909], // Beispielpunkt 8
-            [53.56654381393397, 13.268717130116013], // Beispielpunkt 9
-            [53.56620467540178, 13.268732157613686], // Beispielpunkt 10
-            [53.566231449596195, 13.268187410810611], // Beispielpunkt 11
-            [53.565581811521156, 13.268093545704836], // Beispielpunkt 12
-            [53.56687638152261, 13.267557520903292], // Beispielpunkt 13
-
+            [53.566305296984, 13.268703104912152], // Beispielpunkt 1
+            [53.56705864598058, 13.268795289456328], // Beispielpunkt 2
+            [53.56600498649628, 13.268694732676074], // Beispielpunkt 3
+            [53.56615925258825, 13.268794353940043], // Beispielpunkt 4
+            [53.566433722561534, 13.268866276547065], // Beispielpunkt 5
+            [53.56553827098172, 13.268439974291221], // Beispielpunkt 6
+            [53.56634436151365, 13.269100373943559], // Beispielpunkt 7
+            [53.56643166986505, 13.268475846783412], // Beispielpunkt 8
+            [53.56576254217857, 13.268780466247069], // Beispielpunkt 9
+            [53.566267742626934, 13.268499935255944], // Beispielpunkt 10
+            [53.56653711029122, 13.268750987310785], // Beispielpunkt 11
+            [53.56619553731601, 13.268718900031725], // Beispielpunkt 12
+            [53.5662282503838, 13.268207197101098], // Beispielpunkt 13
+            [53.5655961004054, 13.26808885297522], // Beispielpunkt 14
+            [53.56688226677813, 13.267541415001245] // Beispielpunkt 15
         ];
 
         let currentIndex = 0;
@@ -59,7 +54,6 @@
         const mapElement = document.getElementById("map");
         const imageElement = document.getElementById("image");
         const scoreElement = document.getElementById("score");
-        const endMessageElement = document.getElementById("end-message");
 
         function startGame() {
             startButton.style.display = "none";
@@ -113,31 +107,20 @@
             const distance = getDistance(guessedLat, guessedLng, actualLat, actualLng);
 
             let points = 0;
-            let message = "";
-
             if (distance < 10) {
                 points = 50;
-                message = "Profi!";
             } else if (distance < 20) {
                 points = 40;
-                message = "Nice!";
             } else if (distance < 30) {
                 points = 30;
-                message = "Gut!";
             } else if (distance < 40) {
                 points = 20;
-                message = "Schlecht!";
             } else if (distance < 50) {
                 points = 10;
-                message = "Grottig!";
-            } else {
-                points = 0;
-                message = "Bodenlos!";
             }
 
             totalScore += points;
             scoreElement.textContent = `Aktuelle Punktzahl: ${totalScore}`;
-            alert(`Du hast ${points} Punkte! ${message}`); // Popup message after each guess
         }
 
         function getDistance(lat1, lng1, lat2, lng2) {
@@ -160,37 +143,9 @@
             mapElement.style.display = "none";
             imageElement.style.display = "none";
             scoreElement.textContent = `Deine Gesamtpunktzahl: ${totalScore}`;
-
-            endMessageElement.textContent = "Glückwunsch, du AEG-Profi! Scheint, als kennst du dich am AEG gut aus :D";
         }
 
         startButton.addEventListener("click", startGame);
-
-        function sendEmail(playerName, totalScore) {
-    emailjs.init("ut0VOLRzj4cZdLyFW"); // Füge hier deinen Public Key ein
-
-    const templateParams = {
-        name: playerName, // Spielername aus dem Eingabefeld
-        score: totalScore // Gesamtpunktzahl
-    };
-
-    emailjs.send("service_4c9t23i", "template_4xu9qnr", templateParams)
-        .then(function(response) {
-            console.log("Email erfolgreich gesendet!", response.status, response.text);
-        }, function(error) {
-            console.error("Fehler beim Senden der Email:", error);
-        });
-}
-
-// Diese Funktion rufst du am Ende des Spiels auf:
-function endGame() {
-    const playerName = document.getElementById("player-name").value; // Holt den Spielernamen
-    sendEmail(playerName, totalScore); // Sendet die Email
-    mapElement.style.display = "none";
-    imageElement.style.display = "none";
-    scoreElement.textContent = `Endpunktzahl: ${totalScore}\nGlückwunsch, du AEG-Profi!`;
-}
-
     </script>
 </body>
 </html>
