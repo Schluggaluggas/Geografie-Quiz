@@ -17,6 +17,12 @@
             max-width: 80%;
             margin-bottom: 20px;
         }
+
+        #end-message {
+            font-size: 2em;
+            font-weight: bold;
+            transition: color 1s;
+        }
     </style>
 </head>
 <body>
@@ -144,8 +150,17 @@
 
             // Endbildschirm-Nachricht
             const endMessage = document.createElement("p");
+            endMessage.id = "end-message";
             endMessage.textContent = "Glückwunsch, du AEG-Profi! Du weißt anscheinend (unüberraschenderweise) viel über das AEG. Aber reicht es auch, um der Klassenbeste zu sein?";
             document.getElementById("game-container").appendChild(endMessage);
+
+            // Farbkreis-Effekt
+            let colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3']; // Farben im Farbkreis
+            let i = 0;
+            setInterval(function () {
+                endMessage.style.color = colors[i];
+                i = (i + 1) % colors.length;
+            }, 4000); // Alle 4 Sekunden eine neue Farbe
         }
 
         startButton.addEventListener("click", startGame);
