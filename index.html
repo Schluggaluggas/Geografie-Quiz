@@ -42,7 +42,6 @@
             [53.56621586072058, 13.268215270044626], // Beispielpunkt 11
             [53.56558613248766, 13.268077827823628], // Beispielpunkt 12
             [53.56688731544411, 13.267558401716629], // Beispielpunkt 13
-  
         ];
 
         let currentIndex = 0;
@@ -142,6 +141,11 @@
             mapElement.style.display = "none";
             imageElement.style.display = "none";
             scoreElement.textContent = `Deine Gesamtpunktzahl: ${totalScore}`;
+
+            // Endbildschirm-Nachricht
+            const endMessage = document.createElement("p");
+            endMessage.textContent = "Glückwunsch, du AEG-Profi! Du weißt anscheinend (unüberraschenderweise) viel über das AEG. Aber reicht es auch, um der Klassenbeste zu sein?";
+            document.getElementById("game-container").appendChild(endMessage);
         }
 
         startButton.addEventListener("click", startGame);
