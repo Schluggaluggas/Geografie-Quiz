@@ -17,6 +17,11 @@
             max-width: 80%;
             margin-bottom: 20px;
         }
+        #end-message {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -25,6 +30,7 @@
         <div id="map"></div>
         <p id="score">Aktuelle Punktzahl: 0</p>
         <button id="start-button">Start Game</button>
+        <p id="end-message"></p> <!-- Display the end message here -->
     </div>
 
     <script>
@@ -54,6 +60,7 @@
         const mapElement = document.getElementById("map");
         const imageElement = document.getElementById("image");
         const scoreElement = document.getElementById("score");
+        const endMessageElement = document.getElementById("end-message");
 
         function startGame() {
             startButton.style.display = "none";
@@ -107,20 +114,31 @@
             const distance = getDistance(guessedLat, guessedLng, actualLat, actualLng);
 
             let points = 0;
+            let message = "";
+
             if (distance < 10) {
                 points = 50;
+                message = "Profi!";
             } else if (distance < 20) {
                 points = 40;
+                message = "Nice!";
             } else if (distance < 30) {
                 points = 30;
+                message = "Gut!";
             } else if (distance < 40) {
                 points = 20;
+                message = "Schlecht!";
             } else if (distance < 50) {
                 points = 10;
+                message = "Grottig!";
+            } else {
+                points = 0;
+                message = "Bodenlos!";
             }
 
             totalScore += points;
             scoreElement.textContent = `Aktuelle Punktzahl: ${totalScore}`;
+            alert(`Du hast ${points} Punkte! ${message}`); // Popup message after each guess
         }
 
         function getDistance(lat1, lng1, lat2, lng2) {
@@ -143,6 +161,8 @@
             mapElement.style.display = "none";
             imageElement.style.display = "none";
             scoreElement.textContent = `Deine Gesamtpunktzahl: ${totalScore}`;
+
+            endMessageElement.textContent = "Glückwunsch, du AEG-Profi! Scheint, als kennst du dich am AEG gut aus :D";
         }
 
         startButton.addEventListener("click", startGame);
