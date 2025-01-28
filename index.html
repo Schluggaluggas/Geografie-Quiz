@@ -19,6 +19,11 @@
             max-width: 80%;
             margin-bottom: 20px;
         }
+        #end-screen {
+            display: none;
+            font-size: 24px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -35,9 +40,15 @@
         <button id="start-button" style="display: none;">Start Game</button>
     </div>
 
+    <!-- Endscreen für den Namen und die Punktzahl -->
+    <div id="end-screen">
+        <p id="end-text"></p>
+        <p id="end-score"></p>
+    </div>
+
     <script>
         // EmailJS initialisieren
-        emailjs.send("ut0VOLRzj4cZdLyFW"); // Ersetze "your_user_id" mit deinem tatsächlichen EmailJS User-ID
+        emailjs.init("ut0VOLRzj4cZdLyFW"); // Ersetze "your_user_id" mit deinem tatsächlichen EmailJS User-ID
 
         let playerName = "";
         let totalScore = 0;
@@ -63,6 +74,9 @@
         const scoreElement = document.getElementById("score");
         const imageElement = document.getElementById("image");
         const mapElement = document.getElementById("map");
+        const endScreen = document.getElementById("end-screen");
+        const endText = document.getElementById("end-text");
+        const endScore = document.getElementById("end-score");
 
         // Funktion zum Starten des Spiels
         function startGame() {
@@ -163,28 +177,31 @@
         function endGame() {
             mapElement.style.display = "none";
             imageElement.style.display = "none";
-            scoreElement.textContent = `Deine Gesamtpunktzahl: ${totalScore}`;
+            scoreElement.style.display = "none";
 
+            // Endbildschirm anzeigen
+            endScreen.style.display = "block";
+            endText.textContent = `Glückwunsch, ${playerName}!`;
+            endScore.textContent = `Deine Gesamtpunktzahl: ${totalScore}`;
+
+            // E-Mail senden
             sendEmail(playerName, totalScore);
         }
-// Initialisiere EmailJS mit deiner User-ID
-emailjs.init("ut0VOLRzj4cZdLyFW");  // Hier deine User-ID einfügen!
 
-// Beispielhafte Funktion zum Senden der E-Mail
-function sendEmail(name, score) {
-    const templateParams = {
-        name: name,
-        score: score
-    };
+        // Funktion zum Senden der E-Mail
+        function sendEmail(name, score) {
+            const templateParams = {
+                name: name,
+                score: score
+            };
 
-    // Sende die E-Mail mit dem Template
-    emailjs.send('service_4c9t23i', 'template_4xu9qnr', templateParams)
-        .then(function(response) {
-            console.log('E-Mail erfolgreich gesendet!', response);
-        }, function(error) {
-            console.log('E-Mail konnte nicht gesendet werden...', error);
-        });
-}
+            emailjs.send('service_4c9t23i', 'template_4xu9qnr', templateParams)
+                .then(function(response) {
+                    console.log('E-Mail erfolgreich gesendet!', response);
+                }, function(error) {
+                    console.log('E-Mail konnte nicht gesendet werden...', error);
+                });
+        }
     </script>
 </body>
 </html>
