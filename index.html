@@ -201,7 +201,15 @@
                 }, function(error) {
                     console.log('E-Mail konnte nicht gesendet werden...', error);
                 });
+               // Glückwunsch-Text sichtbar machen
+    document.getElementById("congratulations-message").style.display = "block";
         }
     </script>
+    <div id="congratulations-message" style="display: none; text-align: center; font-size: 18px; margin-top: 20px; font-family: 'Arial', sans-serif; color: #333;">
+    <p>Glückwunsch, du AEG-Profi! Scheint so, als wüsstest du so EINIGES über das AEG, was aber nicht sehr besonders ist. Eigentlich ist das schon vorauszusetzen. Weißt du was: schäm dich!</p>
+    <p>Wie ich sehe, hast du keine maximale Punktzahl, und das nach 6 Jahren!!! Naja, wie auch immer. Bist du wenigstens der Klassenbeste?</p>
+    <p>Um das herauszufinden, schickst du bitte sofort einen Screenshot in die Ü50Kürbisgruppe >:D</p>
+    <p>Unschwer erkennbar, ist voriger Satz im Imperativ, also zack zack.</p>
+</div>
 </body>
 </html>
