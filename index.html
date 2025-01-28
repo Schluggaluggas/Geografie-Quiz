@@ -168,14 +168,14 @@
         startButton.addEventListener("click", startGame);
 
         function sendEmail(playerName, totalScore) {
-    emailjs.init("YOUR_PUBLIC_KEY"); // Füge hier deinen Public Key ein
+    emailjs.init("ut0VOLRzj4cZdLyFW"); // Füge hier deinen Public Key ein
 
     const templateParams = {
         name: playerName, // Spielername aus dem Eingabefeld
         score: totalScore // Gesamtpunktzahl
     };
 
-    emailjs.send("service_4c9t23i", "ut0VOLRzj4cZdLyFW", templateParams)
+    emailjs.send("service_4c9t23i", "template_4xu9qnr", templateParams)
         .then(function(response) {
             console.log("Email erfolgreich gesendet!", response.status, response.text);
         }, function(error) {
