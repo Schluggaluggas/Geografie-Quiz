@@ -167,22 +167,24 @@
 
             sendEmail(playerName, totalScore);
         }
+// Initialisiere EmailJS mit deiner User-ID
+emailjs.init("ut0VOLRzj4cZdLyFW");  // Hier deine User-ID einfügen!
 
-        // Funktion zum Senden der E-Mail
-        function sendEmail(name, score) {
-            const templateParams = {
-                name: name,
-                score: score,
-                message: "Glückwunsch, du hast das Spiel beendet!"
-            };
+// Beispielhafte Funktion zum Senden der E-Mail
+function sendEmail(name, score) {
+    const templateParams = {
+        name: name,
+        score: score
+    };
 
-            emailjs.send('your_service_id', 'your_template_id', templateParams)
-                .then(function(response) {
-                    console.log("E-Mail gesendet: ", response);
-                }, function(error) {
-                    console.log("Fehler beim Senden der E-Mail: ", error);
-                });
-        }
+    // Sende die E-Mail mit dem Template
+    emailjs.send('service_4c9t23i', 'template_4xu9qnr', templateParams)
+        .then(function(response) {
+            console.log('E-Mail erfolgreich gesendet!', response);
+        }, function(error) {
+            console.log('E-Mail konnte nicht gesendet werden...', error);
+        });
+}
     </script>
 </body>
 </html>
