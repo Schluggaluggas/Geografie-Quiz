@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script> <!-- EmailJS script -->
     <style>
         #map {
             height: 500px;
-            display: none; /* Start with the map hidden */
+            display: none;
         }
         #game-container {
             text-align: center;
@@ -17,20 +18,29 @@
             max-width: 80%;
             margin-bottom: 20px;
         }
-
         #end-message {
             font-size: 2em;
             font-weight: bold;
             transition: color 1s;
         }
+        #name-input {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
+        <div id="name-container">
+            <label for="name-input">Gib deinen Namen ein: </label>
+            <input type="text" id="name-input" placeholder="Dein Name">
+            <button id="start-button">Start Game</button>
+        </div>
+
         <img id="image" src="" alt="Current location">
         <div id="map"></div>
         <p id="score">Aktuelle Punktzahl: 0</p>
-        <button id="start-button">Start Game</button>
     </div>
 
     <script>
@@ -53,13 +63,26 @@
         let currentIndex = 0;
         let totalScore = 0;
         let map, marker;
+        let playerName = "";
 
         const startButton = document.getElementById("start-button");
         const mapElement = document.getElementById("map");
         const imageElement = document.getElementById("image");
         const scoreElement = document.getElementById("score");
+        const nameInput = document.getElementById("name-input");
+
+        // Initialize EmailJS
+        emailjs.init("user_your_user_id_here"); // Ersetze mit deinem EmailJS Benutzer-ID
 
         function startGame() {
+            playerName = nameInput.value.trim();
+            if (playerName === "") {
+                alert("Bitte gib deinen Namen ein!");
+                return;
+            }
+            
+            // Verstecke das Nameingabefeld
+            document.getElementById("name-container").style.display = "none";
             startButton.style.display = "none";
             showNextLocation();
         }
@@ -129,7 +152,7 @@
 
         function getDistance(lat1, lng1, lat2, lng2) {
             const R = 6371e3; // metres
-            const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
+            const φ1 = lat1 * Math.PI / 180;
             const φ2 = lat2 * Math.PI / 180;
             const Δφ = (lat2 - lat1) * Math.PI / 180;
             const Δλ = (lng2 - lng1) * Math.PI / 180;
@@ -154,13 +177,22 @@
             endMessage.textContent = "Glückwunsch, du AEG-Profi! Du weißt anscheinend (unüberraschenderweise) viel über das AEG. Aber reicht es auch, um der Klassenbeste zu sein?";
             document.getElementById("game-container").appendChild(endMessage);
 
-            // Farbkreis-Effekt
-            let colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3']; // Farben im Farbkreis
-            let i = 0;
-            setInterval(function () {
-                endMessage.style.color = colors[i];
-                i = (i + 1) % colors.length;
-            }, 4000); // Alle 4 Sekunden eine neue Farbe
+            // Send email with score
+            sendEmail();
+        }
+
+        function sendEmail() {
+            const templateParams = {
+                playerName: playerName,
+                totalScore: totalScore
+            };
+
+            emailjs.send("service_your_service_id_here", "template_your_template_id_here", templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response);
+                }, function(error) {
+                    console.log('FAILED...', error);
+                });
         }
 
         startButton.addEventListener("click", startGame);
