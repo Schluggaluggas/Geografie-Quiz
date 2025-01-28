@@ -166,6 +166,32 @@
         }
 
         startButton.addEventListener("click", startGame);
+
+        function sendEmail(playerName, totalScore) {
+    emailjs.init("YOUR_PUBLIC_KEY"); // Füge hier deinen Public Key ein
+
+    const templateParams = {
+        name: playerName, // Spielername aus dem Eingabefeld
+        score: totalScore // Gesamtpunktzahl
+    };
+
+    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams)
+        .then(function(response) {
+            console.log("Email erfolgreich gesendet!", response.status, response.text);
+        }, function(error) {
+            console.error("Fehler beim Senden der Email:", error);
+        });
+}
+
+// Diese Funktion rufst du am Ende des Spiels auf:
+function endGame() {
+    const playerName = document.getElementById("player-name").value; // Holt den Spielernamen
+    sendEmail(playerName, totalScore); // Sendet die Email
+    mapElement.style.display = "none";
+    imageElement.style.display = "none";
+    scoreElement.textContent = `Endpunktzahl: ${totalScore}\nGlückwunsch, du AEG-Profi!`;
+}
+
     </script>
 </body>
 </html>
