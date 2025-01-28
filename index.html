@@ -19,10 +19,13 @@
             max-width: 80%;
             margin-bottom: 20px;
         }
-        #end-screen {
+        #congratulations-message {
             display: none;
-            font-size: 24px;
-            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+            font-family: 'Arial', sans-serif;
+            color: #333;
         }
     </style>
 </head>
@@ -40,15 +43,16 @@
         <button id="start-button" style="display: none;">Start Game</button>
     </div>
 
-    <!-- Endscreen für den Namen und die Punktzahl -->
-    <div id="end-screen">
-        <p id="end-text"></p>
-        <p id="end-score"></p>
+    <div id="congratulations-message">
+        <p>Glückwunsch, du AEG-Profi! Scheint so, als wüsstest du so EINIGES über das AEG, was aber nicht sehr besonders ist. Eigentlich ist das schon vorauszusetzen. Weißt du was: schäm dich!</p>
+        <p>Wie ich sehe, hast du keine maximale Punktzahl, und das nach 6 Jahren!!! Naja, wie auch immer. Bist du wenigstens der Klassenbeste?</p>
+        <p>Um das herauszufinden, schickst du bitte sofort einen Screenshot in die Ü50Kürbisgruppe >:D</p>
+        <p>Unschwer erkennbar, ist voriger Satz im Imperativ, also zack zack.</p>
     </div>
 
     <script>
         // EmailJS initialisieren
-        emailjs.init("ut0VOLRzj4cZdLyFW"); // Ersetze "your_user_id" mit deinem tatsächlichen EmailJS User-ID
+        emailjs.send("ut0VOLRzj4cZdLyFW"); // Ersetze "your_user_id" mit deinem tatsächlichen EmailJS User-ID
 
         let playerName = "";
         let totalScore = 0;
@@ -74,9 +78,6 @@
         const scoreElement = document.getElementById("score");
         const imageElement = document.getElementById("image");
         const mapElement = document.getElementById("map");
-        const endScreen = document.getElementById("end-screen");
-        const endText = document.getElementById("end-text");
-        const endScore = document.getElementById("end-score");
 
         // Funktion zum Starten des Spiels
         function startGame() {
@@ -177,39 +178,35 @@
         function endGame() {
             mapElement.style.display = "none";
             imageElement.style.display = "none";
-            scoreElement.style.display = "none";
+            scoreElement.textContent = `Deine Gesamtpunktzahl: ${totalScore}`;
 
-            // Endbildschirm anzeigen
-            endScreen.style.display = "block";
-            endText.textContent = `Glückwunsch, ${playerName}!`; // Hier wird der Name gesetzt
-            endScore.textContent = `Deine Gesamtpunktzahl: ${totalScore}`;
-
-            // E-Mail senden
             sendEmail(playerName, totalScore);
+
+            // Glückwunsch-Text sichtbar machen
+            document.getElementById("congratulations-message").style.display = "block";
+            // Hier fügen wir den Namen des Spielers zum Glückwunschtext hinzu:
+            const congratsMessage = document.getElementById("congratulations-message");
+            congratsMessage.innerHTML += `<p>Dein Name: ${playerName}</p>`;
         }
 
-        // Funktion zum Senden der E-Mail
+        // Initialisiere EmailJS mit deiner User-ID
+        emailjs.init("ut0VOLRzj4cZdLyFW");  // Hier deine User-ID einfügen!
+
+        // Beispielhafte Funktion zum Senden der E-Mail
         function sendEmail(name, score) {
             const templateParams = {
                 name: name,
                 score: score
             };
 
+            // Sende die E-Mail mit dem Template
             emailjs.send('service_4c9t23i', 'template_4xu9qnr', templateParams)
                 .then(function(response) {
                     console.log('E-Mail erfolgreich gesendet!', response);
                 }, function(error) {
                     console.log('E-Mail konnte nicht gesendet werden...', error);
                 });
-               // Glückwunsch-Text sichtbar machen
-    document.getElementById("congratulations-message").style.display = "block";
         }
     </script>
-    <div id="congratulations-message" style="display: none; text-align: center; font-size: 18px; margin-top: 20px; font-family: 'Arial', sans-serif; color: #333;">
-    <p>Glückwunsch, du AEG-Profi! Scheint so, als wüsstest du so EINIGES über das AEG, was aber nicht sehr besonders ist. Eigentlich ist das schon vorauszusetzen. Weißt du was: schäm dich!</p>
-    <p>Wie ich sehe, hast du keine maximale Punktzahl, und das nach 6 Jahren!!! Naja, wie auch immer. Bist du wenigstens der Klassenbeste?</p>
-    <p>Um das herauszufinden, schickst du bitte sofort einen Screenshot in die Ü50Kürbisgruppe >:D</p>
-    <p>Unschwer erkennbar, ist voriger Satz im Imperativ, also zack zack.</p>
-</div>
 </body>
 </html>
